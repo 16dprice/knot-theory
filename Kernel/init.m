@@ -45,15 +45,19 @@ KnotTheoryWelcomeMessage[] := StringJoin[
 	"\nRead more at http://katlas.org/wiki/KnotTheory."
 ];
 
-(* Since this function is actually in the knot theory package, this error message should technically never fire... but just in case. *)
+(*
+	Since this function is actually in the knot theory package, this error message should technically never fire... but just in case.
+	It has fired during development of this package due to not having the development directory in the $Path variable, so it's at least
+	useful for development purposes.
+*)
 KnotTheoryDirectory::packageNotFound = "
-	Can't find KnotTheory package on $Path. Ensure that the KnotTheory folder is in a folder on $Path.
+	Can't find KnotTheory package on $Path. Ensure that the KnotTheory folder is in a folder in $Path.
 ";
 
 KnotTheoryDirectory[] := Module[{packageLocation},
-	packageLocation = Flatten[FileInformation[ToFileName[#, "KnotTheory"]] & /@ ($Path /. "." -> Directory[])];
+	packageLocation = Select[ToFileName[#, "KnotTheory"] & /@ ($Path /. "." -> Directory[]), DirectoryQ[#]&];
 	If[Length[packageLocation] == 0, Message[KnotTheoryDirectory::packageNotFound] ];
-	Return[File /. packageLocation];
+	Return[File[packageLocation[[1]]]];
 ];
 
 CreditMessage[cm_String] := Module[{l = Length[$MessageList]},
@@ -71,10 +75,9 @@ DeclarePackage["KnotTheory`Common`", {
 	"Knot",
 	"Link",
 	"TorusKnot",
-	"AlternatingQ",
-	"Loop",
 	"Crossings",
 	"NumberOfKnots",
+	"NumberOfLinks",
 	"AllKnots",
 	"AllLinks",
 	"Alternating",
@@ -82,4 +85,22 @@ DeclarePackage["KnotTheory`Common`", {
 }];
 DeclarePackage["KnotTheory`Jones4Knots`", {
 	"Jones"
+}];
+DeclarePackage["KnotTheory`MinimumBraids`", {
+	"BR"
+}];
+DeclarePackage["KnotTheory`PDCode`", {
+	"PD",
+	"X",
+	"PositiveQ",
+	"NegativeQ",
+	"Loop",
+	"Mirror",
+	"AlternatingQ",
+	"PositiveCrossings",
+	"NegativeCrossings",
+	"ConnectedSum"
+}];
+DeclarePackage["KnotTheory`KnotDrawing`", {
+	"DrawPD"
 }];
