@@ -1,13 +1,17 @@
 (* ::Package:: *)
 
-BeginPackage["KnotTheory`Jones4Knots`", {"KnotTheory`"}];
-Message[KnotTheory::loading, "Jones4Knots`"]
+BeginPackage["KnotTheory`Jones4Knots`", {"KnotTheory`Common`"}];
+
+Jones::usage = "
+  Jones[L][q] computes the Jones polynomial of a knot or link L as a
+  function of the variable q.
+";
 
 Begin["`Private`"];
 
-Ks = Select[AllKnots[], (Crossings[#] <= 10)&];
+knotsBelow10Crossings = Select[AllKnots[], (Crossings[#] <= 10)&];
 
-Js = {1, -q^(-4) + q^(-3) + q^(-1), 1 + q^(-2) - q^(-1) - q + q^2, 
+jonesPolysBelow10Crossings = {1, -q^(-4) + q^(-3) + q^(-1), 1 + q^(-2) - q^(-1) - q + q^2, 
  -q^(-7) + q^(-6) - q^(-5) + q^(-4) + q^(-2), -q^(-6) + q^(-5) - q^(-4) + 
   2/q^3 - q^(-2) + q^(-1), 2 + q^(-4) - q^(-3) + q^(-2) - 2/q - q + q^2, 
  -1 + q^(-5) - 2/q^4 + 2/q^3 - 2/q^2 + 2/q + q, 
@@ -277,14 +281,11 @@ Js = {1, -q^(-4) + q^(-3) + q^(-1), 1 + q^(-2) - q^(-1) - q + q^2,
  8 - q^(-5) + 3/q^4 - 5/q^3 + 7/q^2 - 8/q - 6*q + 5*q^2 - 2*q^3, 
  2*q - 4*q^2 + 6*q^3 - 6*q^4 + 7*q^5 - 6*q^6 + 4*q^7 - 3*q^8 + q^9};
 
-Js = Function /@ (Js /. q -> #);
+jonesPolysBelow10Crossings = Function /@ (jonesPolysBelow10Crossings /. q -> #);
 
-MapThread[(Jones[#1] = #2)&, {Ks, Js}];
+MapThread[(Jones[#1] = #2)&, {knotsBelow10Crossings, jonesPolysBelow10Crossings}];
 
-Clear[Ks, Js];
+Clear[knotsBelow10Crossings, jonesPolysBelow10Crossings];
 
 End[];
 EndPackage[];
-
-
-
