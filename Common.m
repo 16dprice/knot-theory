@@ -19,6 +19,10 @@ TorusKnot::usage = "
   TorusKnot[m, n] represents the (m,n) torus knot.
 ";
 
+TorusKnot::invalidInput = "
+	TorusKnot[`1`, `2`] invalid because either `1` or `2` is less than or equal to 0.
+";
+
 AlternatingQ::usage = "
   AlternatingQ[D] returns True iff the knot/link diagram D is alternating.
 ";
@@ -54,6 +58,11 @@ Alternating;
 NonAlternating;
 
 Begin["`Private`"];
+
+TorusKnot[m_, n_] /; m <= 0 || n <= 0 := (
+	Message[TorusKnot::invalidInput, m, n];
+	Return[TorusKnot[1, 1]];
+);
 
 Crossings[Knot[n_, __]] := n;
 Crossings[Link[n_, __]] := n;
