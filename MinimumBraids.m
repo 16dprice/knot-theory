@@ -1,6 +1,8 @@
 (* ::Package:: *)
 
-BeginPackage["KnotTheory`MinimumBraids`", {"KnotTheory`Common`"}];
+BeginPackage["KnotTheory`MinimumBraids`", {
+	"KnotTheory`Common`"
+}];
 
 BR::usage = "
 	BR stands for Braid Representative. BR[k,l] represents a
@@ -24,14 +26,27 @@ BR::about = "
 
 Begin["`Private`"];
 
-br[bi_Integer, bs_String] := (
-	CreditMessage["The minimum braids representing the knots with up to 10 crossings were provided by Thomas Gittings. See arXiv:math.GT/0401051."];
-	BR[bi, bs];
-);
+BR[br_BR] := br;
 
 BR[TorusKnot[m_, n_]] := BR[n, Flatten[Table[Range[n - 1], {m}]]];
 
-BR[Knot[0,1]] := br[1, ""];
+BR[k_Integer, s_String] := BR[
+	k,
+	ToCharacterCode[s] /. j_Integer :> If[j < 97, 64 - j, j - 96]
+];
+
+Mirror[BR[k_Integer, l_List]] := BR[k, -l];
+BR[Mirror[L_Knot|L_Link]] := Mirror[BR[L]];
+
+br[bi_Integer, bs_String] := (
+	CreditMessage["
+		The minimum braids representing the knots with up to 10 crossings
+		were provided by Thomas Gittings. See arXiv:math.GT/0401051."
+	];
+	Return[BR[bi, bs]];
+);
+
+BR[Knot[0, 1]] := br[1, ""];
 BR[Knot[3, 1]] := br[2, "AAA"];
 BR[Knot[4, 1]] := br[3, "AbAb"];
 BR[Knot[5, 1]] := br[2, "AAAAA"];

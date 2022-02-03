@@ -23,10 +23,6 @@ TorusKnot::invalidInput = "
 	TorusKnot[`1`, `2`] invalid because either `1` or `2` is less than or equal to 0.
 ";
 
-AlternatingQ::usage = "
-  AlternatingQ[D] returns True iff the knot/link diagram D is alternating.
-";
-
 Loop::usage = "
   Loop[i] represents a crossingsless loop labeled i.
 ";
@@ -42,6 +38,12 @@ NumberOfKnots::usage = "
 	of the specified type.
 ";
 
+NumberOfLinks::usage = "
+	NumberOfLinks[n] returns the number of links with n crossings.
+	NumberOfLinks[n, Alternating|NonAlternating] returns the number of links
+	of the specified type.
+";
+
 AllKnots::usage = "
   AllKnots[] return a list of all knots with up to 11 crossings. AllKnots[n_] returns
   a list of all knots with n crossings, up to 16. AllKnots[{n_,m_}] returns a list of
@@ -51,7 +53,15 @@ AllKnots::usage = "
 
 AllLinks::usage = "
   AllLinks[] return a list of all links with up to 11 crossings. AllLinks[n_] returns
-  a list of all links with n crossings, up to 12.
+  a list of all links with n! crossings, up to 12.
+";
+
+AllKnots::crossingNumberOutOfBounds = AllLinks::crossingNumberOutOfBounds = "
+	There is currently no data for `1` crossings.
+";
+
+AllKnots::improperlyOrderedIndices = AllLinks::improperlyOrderedIndices = "
+	The minimum crossing value `1` is greater than the maximum crossing value `2`.
 ";
 
 Alternating;
@@ -103,22 +113,6 @@ NumberOfKnots[14, NonAlternating] = 27436;
 NumberOfKnots[15, NonAlternating] = 168030;
 NumberOfKnots[16, NonAlternating] = 1008906;
 
-NumberOfKnots[n_] := NumberOfKnots[n, Alternating] + NumberOfKnots[n, NonAlternating];
-NumberOfKnots[{n_, m_}] := Sum[NumberOfKnots[k], {k, n, m}];
-NumberOfKnots[{n_, m_}, t_] := Sum[NumberOfKnots[k, t], {k, n, m}];
-
-NumberOfLinks[2] = 1;
-NumberOfLinks[3] = 0;
-NumberOfLinks[4] = 1;
-NumberOfLinks[5] = 1;
-NumberOfLinks[6] = 6;
-NumberOfLinks[7] = 9;
-NumberOfLinks[8] = 29;
-NumberOfLinks[9] = 83;
-NumberOfLinks[10] = 287;
-NumberOfLinks[11] = 1007;
-NumberOfLinks[12] = 4276;
-NumberOfLinks[13] = 7539;
 NumberOfLinks[2, Alternating] = 1;
 NumberOfLinks[3, Alternating] = 0;
 NumberOfLinks[4, Alternating] = 1;
@@ -142,33 +136,113 @@ NumberOfLinks[10, NonAlternating] = 113;
 NumberOfLinks[11, NonAlternating] = 459;
 NumberOfLinks[12, NonAlternating] = 2256;
 
+NumberOfKnots[n_] := NumberOfKnots[n, Alternating] + NumberOfKnots[n, NonAlternating];
+NumberOfKnots[{n_, m_}] := Sum[NumberOfKnots[k], {k, n, m}];
+NumberOfKnots[{n_, m_}, t_] := Sum[NumberOfKnots[k, t], {k, n, m}];
+
+NumberOfLinks[n_] := NumberOfLinks[n, Alternating] + NumberOfLinks[n, NonAlternating];
 NumberOfLinks[{n_, m_}]:= Sum[NumberOfLinks[k], {k,n,m}];
 NumberOfLinks[{n_, m_}, t_]:= Sum[NumberOfLinks[k, t], {k,n,m}];
 
 (* These are ordered lists for the purpose of data loading! Do not mess! *)
-AllKnots[] = Flatten[{
+AllKnots[] := Flatten[{
   Table[Knot[n,k], {n,0,10}, {k,NumberOfKnots[n]}],
   Table[Knot[11, Alternating, k], {k, NumberOfKnots[11, Alternating]}],
   Table[Knot[11, NonAlternating, k], {k, NumberOfKnots[11, NonAlternating]}]
 }];
 
-AllLinks[] = Flatten[Table[{
+AllLinks[] := Flatten[Table[{
   Table[Link[n, Alternating, k], {k,NumberOfLinks[n, Alternating]}],
   Table[Link[n, NonAlternating, k], {k,NumberOfLinks[n, NonAlternating]}]
 }, {n,2,11}]];
 
-AllKnots[n_]/;n<=10:=Table[Knot[n,k],{k,1,NumberOfKnots[n]}];
-AllKnots[n_]/;11<=n<=16:=AllKnots[n,Alternating]~Join~AllKnots[n,NonAlternating];
-AllKnots[n_,t_]/;11<=n<=16:=Table[Knot[n,t,k],{k,1,NumberOfKnots[n,t]}];
-AllKnots[n_,Alternating]/;n<=10:=Table[Knot[n,k],{k,1,NumberOfKnots[n,Alternating]}];
-AllKnots[n_,NonAlternating]/;n<=10:=Table[Knot[n,NumberOfKnots[n,Alternating]+k],{k,1,NumberOfKnots[n,NonAlternating]}];
-AllKnots[{n_,m_}]:=Join@@Table[AllKnots[i],{i,n,m}];
-AllLinks[n_]/;2<=n<=12:=AllLinks[n,Alternating]~Join~AllLinks[n,NonAlternating];
-AllLinks[n_,t_]/;2<=n<=12:=Table[Link[n,t,k],{k,1,NumberOfLinks[n,t]}];
-AllLinks[{n_,m_}]:=Join@@Table[AllLinks[i],{i,n,m}];
+AllKnots[crossingNumber_] := Module[{},
+	If[0 <= crossingNumber <= 10, 
+		Return[Table[Knot[crossingNumber, k], {k, 1, NumberOfKnots[crossingNumber]}]]
+	];
+	
+	If[11 <= crossingNumber <= 16,
+		Return[AllKnots[crossingNumber, Alternating]~Join~AllKnots[crossingNumber, NonAlternating]]
+	];
+
+	Message[AllKnots::crossingNumberOutOfBounds, crossingNumber];
+	Return[{}];
+];
+
+AllKnots[crossingNumber_, t_] := Module[{},
+	If[0 <= crossingNumber <= 10,
+		If[t === Alternating,
+			Return[Table[Knot[crossingNumber, k], {k, NumberOfKnots[crossingNumber, Alternating]}]],
+			Return[Table[
+				Knot[crossingNumber, NumberOfKnots[crossingNumber, Alternating] + k],
+				{k, NumberOfKnots[crossingNumber, NonAlternating]}
+			]]
+		]
+	];
+	
+	If[11 <= crossingNumber <= 16,
+		Return[Table[Knot[crossingNumber, t, k], {k, NumberOfKnots[crossingNumber, t]}]]
+	];
+	
+	Message[AllKnots::crossingNumberOutOfBounds, crossingNumber];
+	Return[{}];
+];
+
+AllKnots[{minCrossings_, maxCrossings_}] := Module[{},
+	If[minCrossings < 0 || minCrossings > 16,
+		Message[AllKnots::crossingNumberOutOfBounds, minCrossings];
+		Return[{}];
+	];
+	
+	If[maxCrossings < 0 || maxCrossings > 16,
+		Message[AllKnots::crossingNumberOutOfBounds, maxCrossings];
+		Return[{}];
+	];
+	
+	If[minCrossings > maxCrossings,
+		Message[AllKnots::improperlyOrderedIndices, minCrossings, maxCrossings];
+		Return[{}];
+	];
+	
+	Return[Join@@Table[AllKnots[i], {i, minCrossings, maxCrossings}]];
+];
+
+AllLinks[crossingNumber_] := Module[{},
+	If[2 <= crossingNumber <= 12,
+		Return[AllLinks[crossingNumber, Alternating]~Join~AllLinks[crossingNumber, NonAlternating]];
+	];
+	
+	Message[AllLinks::crossingNumberOutOfBounds, crossingNumber];
+	Return[{}];
+];
+
+AllLinks[crossingNumber_, t_] := Module[{},
+	If[2 <= crossingNumber <= 12,
+		Return[Table[Link[crossingNumber, t, k], {k, NumberOfLinks[crossingNumber, t]}]];
+	];
+	
+	Message[AllKnots::crossingNumberOutOfBounds, crossingNumber];
+	Return[{}];
+];
+
+AllLinks[{minCrossings_, maxCrossings_}] := Module[{},
+	If[minCrossings < 2 || minCrossings > 12,
+		Message[AllLinks::crossingNumberOutOfBounds, minCrossings];
+		Return[{}];
+	];
+	
+	If[maxCrossings < 2 || maxCrossings > 12,
+		Message[AllLinks::crossingNumberOutOfBounds, maxCrossings];
+		Return[{}];
+	];
+	
+	If[minCrossings > maxCrossings,
+		Message[AllLinks::improperlyOrderedIndices, minCrossings, maxCrossings];
+		Return[{}];
+	];
+	
+	Return[Join@@Table[AllLinks[i], {i, minCrossings, maxCrossings}]];
+];
 
 End[];
 EndPackage[];
-
-
-
