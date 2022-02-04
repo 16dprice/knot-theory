@@ -29,7 +29,7 @@ Begin["`Private`"];
 
 MajorVersion = 0;
 MinorVersion = 0;
-PatchVersion = 0;
+PatchVersion = 1;
 
 KnotTheoryVersion[] := StringJoin[
 	ToString[MajorVersion],
