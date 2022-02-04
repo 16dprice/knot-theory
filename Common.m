@@ -3,33 +3,29 @@
 BeginPackage["KnotTheory`Common`"];
 
 Knot::usage = "
-  Knot[n, k] denotes the kth knot with n crossings in the Rolfsen table.
-  Knot[n, Alternating, k] (for n between 11 and 16) denotes the kth alternating n-crossing knot in
-  the Hoste-Thistlethwaite table. Similary, Knot[n, NonAlternating, k] denotes the
-  kth non alternating n-crossing knot in the Hoste-Thistlethwaite table.
+	Knot[n, k] denotes the kth knot with n crossings in the Rolfsen table.
+	Knot[n, Alternating, k] (for n between 11 and 16) denotes the kth alternating n-crossing knot in
+	the Hoste-Thistlethwaite table. Similary, Knot[n, NonAlternating, k] denotes the
+	kth non alternating n-crossing knot in the Hoste-Thistlethwaite table.
 ";
 
 Link::usage = "
-  Link[n, Alternating, k] denotes the kth alternating n-crossing link in
-  the Thistlethwaite table. Link[n, NonAlternating, k] denotes the kth
-  non alternating n-crossing link in the Thistlethwaite table.
+	Link[n, Alternating, k] denotes the kth alternating n-crossing link in
+	the Thistlethwaite table. Link[n, NonAlternating, k] denotes the kth
+	non alternating n-crossing link in the Thistlethwaite table.
 ";
 
 TorusKnot::usage = "
-  TorusKnot[m, n] represents the (m,n) torus knot.
+	TorusKnot[m, n] represents the (m,n) torus knot.
 ";
 
 TorusKnot::invalidInput = "
 	TorusKnot[`1`, `2`] invalid because either `1` or `2` is less than or equal to 0.
 ";
 
-Loop::usage = "
-  Loop[i] represents a crossingsless loop labeled i.
-";
-
 Crossings::usage = "
-  Crossings[L] returns the number of crossings of a knot/link L (in its
-  given presentation).
+	Crossings[L] returns the number of crossings of a knot/link L (in its
+	given presentation).
 ";
 
 NumberOfKnots::usage = "
@@ -45,15 +41,15 @@ NumberOfLinks::usage = "
 ";
 
 AllKnots::usage = "
-  AllKnots[] return a list of all knots with up to 11 crossings. AllKnots[n_] returns
-  a list of all knots with n crossings, up to 16. AllKnots[{n_,m_}] returns a list of
-  all knots with between n and m crossings, and AllKnots[n_,Alternating|NonAlternating]
-  returns all knots with n crossings of the specified type.
+	AllKnots[] return a list of all knots with up to 11 crossings. AllKnots[n_] returns
+	a list of all knots with n crossings, up to 16. AllKnots[{n_,m_}] returns a list of
+	all knots with between n and m crossings, and AllKnots[n_,Alternating|NonAlternating]
+	returns all knots with n crossings of the specified type.
 ";
 
 AllLinks::usage = "
-  AllLinks[] return a list of all links with up to 11 crossings. AllLinks[n_] returns
-  a list of all links with n! crossings, up to 12.
+	AllLinks[] return a list of all links with up to 11 crossings. AllLinks[n_] returns
+	a list of all links with n! crossings, up to 12.
 ";
 
 AllKnots::crossingNumberOutOfBounds = AllLinks::crossingNumberOutOfBounds = "
@@ -76,6 +72,9 @@ TorusKnot[m_, n_] /; m <= 0 || n <= 0 := (
 
 Crossings[Knot[n_, __]] := n;
 Crossings[Link[n_, __]] := n;
+Crossings[TorusKnot[m_, n_]] := m * (n - 1);
+Crossings[pd_PD] := Count[pd, _X];
+Crossings[L_Knot|L_Link] := Crossings[PD[L]];
 
 NumberOfKnots[0, Alternating] = 1;
 NumberOfKnots[1, Alternating] = 0;

@@ -104,6 +104,3 @@ DeclarePackage["KnotTheory`PDCode`", {
 DeclarePackage["KnotTheory`KnotDrawing`", {
 	"DrawPD"
 }];
-
-
-
